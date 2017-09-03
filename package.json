@@ -51,7 +51,7 @@
     "build:prod": "webpack --colors --config webpack/webpack.config.js --env=prod",
     "build:analyze": "npm run rmdocs && webpack --colors --config webpack/webpack.config.js --env=analyze",
     "rmdocs": "rm -rf docs",
-    "start": "npm run rmdocs && webpack-dev-server --colors --watch --config webpack/webpack.config.js --env=dev"
+    "start": "npm run rmdocs && webpack-dev-server --colors --watch --config webpack/webpack.config.js --host $IP --port $PORT --public $C9_HOSTNAME --env=dev"
   },
   "repository": {
     "type": "git",

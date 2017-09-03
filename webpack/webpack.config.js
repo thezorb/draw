@@ -39,7 +39,8 @@ module.exports = env => ({
   plugins: plugins(env),
   devServer: env !== 'dev' ? undefined : {
     contentBase: distDir,
-    port: 9080,
+    // host: process.env.IP,
+    port: process.env.PORT,
     historyApiFallback: {
       rewrites: [
         {
