@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "esnext",
     "allowSyntheticDefaultImports": true,
     "baseUrl": "./src",
     // "sourceMap": true, // not needed when assembled with webpack
