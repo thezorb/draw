@@ -5,15 +5,14 @@ const plugins = require('./plugins')
 const rootDir = process.cwd()
 const distDir = path.join(rootDir, 'docs')
 
-module.exports = ({ ENV }) => ({
+module.exports = env => ({
   target: 'web',
-  context: path.join(rootDir, 'src'),
   entry: {
-    app: './index.tsx',
+    app: './src/index.tsx',
   },
   output: {
     path: distDir,
-    filename: ENV === 'prod' ? '[name].[hash].js' : '[name].js',
+		filename: env === 'dev' ? '[name].js' : '[name].[chunkhash].js',
     sourceMapFilename: '[file].map',
   },
   resolve: {
@@ -27,27 +26,27 @@ module.exports = ({ ENV }) => ({
       path.resolve(rootDir, 'src'),
       'node_modules',
     ],
-    alias: {
-      'leaflet-dist': path.join(rootDir, 'node_modules/leaflet/dist'),
-      'alertify-dist': path.join(rootDir, 'node_modules/alertifyjs/build'),
-    },
+    // alias: env === 'dev' ? undefined : {
+    //   'react': path.join(rootDir, 'node_modules/react/dist/react.min.js'),
+    //   'react-dom': path.join(rootDir, 'node_modules/react-dom/dist/react-dom.min.js'),
+    // },
   },
-  devtool: ENV === 'dev' ? 'source-map' : undefined,
+  devtool: env === 'dev' ? 'source-map' : undefined,
   module: {
-    rules: rules(ENV),
+    rules: rules(env),
   },
-  plugins: plugins(ENV),
-  devServer: ENV !== 'dev' ? undefined : {
+  plugins: plugins(env),
+  devServer: env !== 'dev' ? undefined : {
     contentBase: distDir,
-    compress: true,
     port: 9080,
     historyApiFallback: {
       rewrites: [
         {
           from: /./,
           to: '/404.html',
-        }
-      ]
-    }
+        },
+      ],
+    },
+    open: true,
   },
 })

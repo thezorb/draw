@@ -1,10 +1,12 @@
 import * as React from 'react'
-import styled from 'styled-components'
-import { shuffle } from 'lodash'
+import { shuffle, uniqueId } from 'lodash'
 
-import { GSTeam as Team } from 'utils/team'
-import getPossibleGroups from './possible-groups'
+import { GSTeam as Team } from 'model/team'
+import { allPossibleGroups } from 'model/possible-groups'
+// import predicate from 'model/experimental/predicate'
+
 import animateContentTransfer from 'utils/animateContentTransfer'
+import getGroupLetter from 'utils/getGroupLetter'
 
 import PotsContainer from 'components/PotsContainer'
 // import AirborneContainer from 'components/AirborneContainer'
@@ -15,21 +17,14 @@ import TeamBowl from 'components/bowls/TeamBowl'
 import GroupBowl from 'components/bowls/GroupBowl'
 import Announcement from 'components/Announcement'
 
-const Root = styled.div`
-  display: flex;
-  margin: auto;
-  width: 1000px;
-  @media (max-width: 999px) {
-    width: 100%;
-    flex-direction: column;
-  }
-`
+import Root from 'pages/Root'
 
 interface Props {
   pots: Team[][],
 }
 
 interface State {
+  drawId: string,
   initialPots: Team[][],
   pots: Team[][],
   groups: Team[][],
@@ -51,12 +46,13 @@ export default class GS extends React.PureComponent<Props, State> {
     this.reset()
   }
 
-  protected reset = () => {
+  private reset = () => {
     const initialPots = this.props.pots
     const currentPotNum = 0
     const pots = initialPots.map(pot => shuffle(pot))
     const currentPot = pots[currentPotNum]
     this.setState({
+      drawId: `draw-${uniqueId()}`,
       initialPots,
       pots,
       groups: currentPot.map(team => []),
@@ -73,18 +69,19 @@ export default class GS extends React.PureComponent<Props, State> {
     })
   }
 
-  private onTeamBallPick = (ev: React.MouseEvent<HTMLDivElement>) => {
-    const ball = ev.target as HTMLDivElement
+  private onTeamBallPick = (i: number) => {
     const {
       groups,
       pots,
       currentPotNum,
     } = this.state
+
     const currentPot = pots[currentPotNum]
     const hungPot = currentPot.slice()
-    const i = currentPot.findIndex(team => team.id === ball.dataset.teamid)
     const selectedTeam = currentPot.splice(i, 1)[0]
-    const possibleGroups = getPossibleGroups(pots, groups, selectedTeam, currentPotNum)
+    // const possibleGroups = allPossibleGroups(pots, groups, selectedTeam, currentPotNum, predicate)
+    const possibleGroups = allPossibleGroups(pots, groups, selectedTeam, currentPotNum)
+
     this.setState({
       hungPot,
       selectedTeam,
@@ -94,16 +91,13 @@ export default class GS extends React.PureComponent<Props, State> {
     })
   }
 
-  private onGroupBallPicked = (ev: React.MouseEvent<HTMLDivElement>) => {
-    const ball = ev.target as HTMLDivElement
-    const pickedGroup = +(ball.dataset.group || 0)
+  private onGroupBallPick = (pickedGroup: number) => {
     const {
       groups,
       airborneTeams,
       selectedTeam,
       pots,
       currentPotNum,
-      completed,
     } = this.state
 
     if (!selectedTeam) {
@@ -128,9 +122,10 @@ export default class GS extends React.PureComponent<Props, State> {
       completed: newCurrentPotNum >= pots.length,
       airborneTeams,
     }, async () => {
+      const newAirborneTeams = this.state.airborneTeams.filter(team => team !== selectedTeam)
       await animation
       this.setState({
-        airborneTeams: this.state.airborneTeams.filter(team => team !== selectedTeam),
+        airborneTeams: newAirborneTeams,
       })
     })
   }
@@ -141,10 +136,10 @@ export default class GS extends React.PureComponent<Props, State> {
       return
     }
     const fromCell = document.querySelector(`[data-cellid='${selectedTeam.id}']`)
-    const toCellSelector = `[data-cellid='${String.fromCharCode(65 + pickedGroup)}${currentPotNum}']`
+    const toCellSelector = `[data-cellid='${getGroupLetter(pickedGroup)}${currentPotNum}']`
     const toCell = document.querySelector(toCellSelector)
     if (fromCell instanceof HTMLElement && toCell instanceof HTMLElement) {
-      return animateContentTransfer(fromCell, toCell, 300)
+      return animateContentTransfer(fromCell, toCell, 350)
     }
   }
 
@@ -193,16 +188,18 @@ export default class GS extends React.PureComponent<Props, State> {
             onPick={this.onTeamBallPick}
           />
           <Announcement
+            long={false}
             completed={completed}
             selectedTeam={selectedTeam}
             pickedGroup={pickedGroup}
             possibleGroups={possibleGroups}
+            numGroups={groups.length}
             reset={this.reset}
           />
           <GroupBowl
             completed={completed}
             possibleGroups={possibleGroupsShuffled}
-            onPick={this.onGroupBallPicked}
+            onPick={this.onGroupBallPick}
           />
         </BowlsContainer>
       </Root>

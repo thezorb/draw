@@ -1,7 +1,8 @@
 import * as React from 'react'
 import styled from 'styled-components'
 
-import { Team } from 'utils/team'
+import getGroupLetter from 'utils/getGroupLetter'
+import { Team } from 'model/team'
 import Group from './Group'
 
 const Root = styled.div`
@@ -12,10 +13,10 @@ const Root = styled.div`
     flex-basis: 22%;
   }
   & > :nth-child(-n + ${({ numGroups }) => (numGroups ? numGroups >> 1 : 0)}) {
-    background-color: #fee;
+    background-color: rgb(255, 248, 240);
   }
   & > :nth-child(n + ${({ numGroups }) => (numGroups ? (numGroups >> 1) + 1 : 0)}) {
-    background-color: #eef;
+    background-color: rgb(240, 248, 255);
   }
 `
 
@@ -28,19 +29,19 @@ interface Props {
   airborneTeams: Team[],
 }
 
-const GroupsContainer = ({
+const GroupsContainer: React.SFC<Props> = ({
   maxTeams,
   currentPotNum,
   groups,
   possibleGroups,
   selectedTeam,
   airborneTeams,
-}: Props) => (
+}) => (
   <Root numGroups={groups.length}>
     {groups && groups.map((group, i) => (
       <Group
         maxTeams={maxTeams}
-        groupLetter={String.fromCharCode(65 + i)}
+        groupLetter={getGroupLetter(i)}
         teams={group}
         potNum={currentPotNum}
         possible={possibleGroups !== null && possibleGroups.includes(i)}

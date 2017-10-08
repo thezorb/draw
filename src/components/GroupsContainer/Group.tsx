@@ -1,10 +1,10 @@
 import * as React from 'react'
+import { difference, range } from 'lodash'
 
-import { Team } from 'utils/team'
+import { Team } from 'model/team'
 import Table from 'components/table/Table'
 import Header from 'components/table/Header'
 import Body from 'components/table/Body'
-
 import Cell from './GroupCell'
 
 interface Props {
@@ -16,41 +16,38 @@ interface Props {
   airborneTeams: Team[],
 }
 
-const Group = ({
+const Group: React.SFC<Props> = ({
   maxTeams,
   groupLetter,
   teams,
   potNum,
   possible,
   airborneTeams,
-}: Props) => (
-  <Table>
-    <Header>
-      Group {groupLetter}
-    </Header>
-    <Body>
-      {teams.concat(new Array(maxTeams - teams.length).fill(null)).map((team, i) => {
-        if (team === null || airborneTeams.includes(team)) {
-          return (
-            <Cell
-              possible={i === potNum && possible}
-              data-cellid={`${groupLetter}${i}`}
-            />
-          )
-        }
-        const { name, country, id } = team
-        return (
+}) => {
+  const nonAirborneTeams = difference(teams, airborneTeams)
+  return (
+    <Table>
+      <Header>
+        Group {groupLetter}
+      </Header>
+      <Body>
+        {nonAirborneTeams.map((team, i) => (
           <Cell
-            country={country}
+            country={team.country}
             picked
-            data-teamid={id}
           >
-            {name}
+            {team.shortName || team.name}
           </Cell>
-        )
-      })}
-    </Body>
-  </Table>
-)
+        ))}
+        {range(nonAirborneTeams.length, maxTeams).map(i => (
+          <Cell
+            possible={i === potNum && possible}
+            data-cellid={`${groupLetter}${i}`}
+          />
+        ))}
+      </Body>
+    </Table>
+  )
+}
 
 export default Group

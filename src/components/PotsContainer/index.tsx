@@ -2,7 +2,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { difference } from 'lodash'
 
-import { Team } from 'utils/team'
+import { Team } from 'model/team'
 import Pot from './Pot'
 
 const Root = styled.div`
@@ -45,10 +45,9 @@ class PotsContainer extends React.PureComponent<Props> {
         {initialPots && initialPots.map((pot, i) => {
           const isCurrent = i === currentPotNum
           const pickedTeams = isCurrent ? this.getPickedTeams() : i < currentPotNum ? pot : []
-
           return (
             <Pot
-              key={pot[0].name}
+              key={pot[0].id}
               potNum={i}
               isCurrent={isCurrent}
               teams={pot}

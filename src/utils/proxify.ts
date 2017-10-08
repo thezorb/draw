@@ -1,4 +1,4 @@
+const HOST = 'https://heather-guardian.glitch.me'
 
-const PROXY_URL = 'https://proxy-antonv.rhcloud.com/?url='
-
-export default (url: string) => `${PROXY_URL}${url}`
+export default (url: string, encoding: string) =>
+  `${HOST}/?url=${encodeURIComponent(url)}${encoding ? `&encoding=${encoding}` : ''}`
