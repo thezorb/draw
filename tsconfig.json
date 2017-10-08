@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "target": "esnext",
+    "module": "none",
+    "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "baseUrl": "./src",
     // "sourceMap": true, // not needed when assembled with webpack

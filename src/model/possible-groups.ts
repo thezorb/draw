@@ -70,10 +70,12 @@ function filterGroupsBasic(
   return bottom.length === 0 ? top : top.length === 0 ? bottom : bottom.concat(top)
 }
 
+const ru = (otherTeam: Team) => otherTeam.country === 'ua'
+const ua = (otherTeam: Team) => otherTeam.country === 'ru'
+const def = (otherTeam: Team) => false
+
 const extraConstraints = (teamPicked: Team) =>
-  teamPicked.country === 'ru' ?
-    ((otherTeam: Team) => otherTeam.country === 'ua') : teamPicked.country === 'ua' ?
-    ((otherTeam: Team) => otherTeam.country === 'ru') : (otherTeam: Team) => false
+  teamPicked.country === 'ru' ? ru : teamPicked.country === 'ua' ? ua : def
 
 function filterSomeGroups(
   groups: Team[][],
