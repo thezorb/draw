@@ -10,9 +10,7 @@ import proxify from 'utils/proxify'
 import { GSTeam, Last16Team } from './team'
 import currentSeason from './currentSeason'
 
-declare const System: any
-
-const getClubName = mobile && System.import('utils/club-name')
+const getClubName = mobile && import('utils/club-name')
 
 const BERT_HOST = 'http://kassiesa.home.xs4all.nl/bert/uefa'
 
@@ -107,7 +105,7 @@ const findTeam = (teams: GSTeam[], name: string) =>
 
 function pairUpTeams(teams: GSTeam[]): GSTeam[] {
   const teamsCopy = teams.slice()
-  for (const [team1str, team2str] of pairings) {
+  for (const [team1str, team2str] of Object.values(pairings)) {
     const team1 = findTeam(teamsCopy, team1str)
     const team2 = findTeam(teamsCopy, team2str)
     if (!team1 || !team2) {
