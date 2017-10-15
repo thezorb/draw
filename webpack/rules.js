@@ -13,7 +13,7 @@ const tsOptions = env => env === 'dev' ? {
 
 module.exports = env => [
   {
-    test: /worker\.[jt]s/,
+    test: /worker\.[jt]s/i,
     loader: 'worker-loader',
   },
   {

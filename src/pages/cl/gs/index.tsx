@@ -69,7 +69,7 @@ export default class GS extends React.PureComponent<Props, State> {
     })
   }
 
-  private onTeamBallPick = (i: number) => {
+  private onTeamBallPick = async (i: number) => {
     const {
       groups,
       pots,
@@ -79,7 +79,7 @@ export default class GS extends React.PureComponent<Props, State> {
     const currentPot = pots[currentPotNum]
     const hungPot = currentPot.slice()
     const selectedTeam = currentPot.splice(i, 1)[0]
-    // const possibleGroups = allPossibleGroups(pots, groups, selectedTeam, currentPotNum, predicate)
+    // const possibleGroups = await allPossibleGroups(pots, groups, selectedTeam, currentPotNum, predicate)
     const possibleGroups = allPossibleGroups(pots, groups, selectedTeam, currentPotNum)
 
     this.setState({
