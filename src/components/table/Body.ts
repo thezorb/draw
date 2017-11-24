@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 
-const Body = styled.div`
+const Body = styled.tbody`
 `
 
 export default Body

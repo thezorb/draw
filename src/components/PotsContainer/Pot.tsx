@@ -5,6 +5,7 @@ import Team from 'model/team'
 import GSTeam from 'model/team/GSTeam'
 import Table from 'components/table/Table'
 import Body from 'components/table/Body'
+import Row from 'components/table/Row'
 import Header from './PotHeader'
 import Cell from './PotCell'
 
@@ -37,12 +38,14 @@ const Pot: React.SFC<Props> = ({
 }) => {
   return (
     <Root highlighted={isCurrent}>
-      <Header
-        highlighted={isCurrent}
-        depleted={depleted}
-      >
-        Pot {potNum + 1}
-      </Header>
+      <thead>
+        <Header
+          highlighted={isCurrent}
+          depleted={depleted}
+        >
+          Pot {potNum + 1}
+        </Header>
+      </thead>
       <Body>
         {teams && teams.map(team => {
           const {
@@ -52,16 +55,17 @@ const Pot: React.SFC<Props> = ({
             pairing,
           } = team as GSTeam
           return (
-            <Cell
-              key={team.id}
-              data-cellId={team.id}
-              title={pairing && `paired with ${pairing.name}`}
-              selected={selectedTeams && selectedTeams.includes(team)}
-              picked={pickedTeams.includes(team)}
-              country={country}
-            >
-              {shortName || name}
-            </Cell>
+            <Row key={team.id}>
+              <Cell
+                data-cellId={team.id}
+                title={pairing && `paired with ${pairing.name}`}
+                selected={selectedTeams && selectedTeams.includes(team)}
+                picked={pickedTeams.includes(team)}
+                country={country}
+              >
+                {shortName || name}
+              </Cell>
+            </Row>
           )
         })}
       </Body>

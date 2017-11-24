@@ -1,11 +1,7 @@
 import styled from 'styled-components'
 
-const BaseCell = styled.div`
-  display: flex;
-  align-items: center;
-
-  height: 19px;
-  margin: -1px -1px -1px -1px;
+const BaseCell = styled.td`
+  height: 17px;
   border: #aaa solid 1px;
 
   text-align: center;
