@@ -1,12 +1,16 @@
 import * as React from 'react'
 import { range } from 'lodash'
 
-import currentSeason from 'model/currentSeason'
-import seasonAsString from 'utils/seasonAsString'
 import Select from 'components/SelectWithHiddenLabel'
 
-const MIN_CL_SEASON = 2000
-const MIN_EL_SEASON = 2009
+import currentSeasonByTournament from 'utils/currentSeasonByTournament'
+import seasonAsString from 'utils/seasonAsString'
+
+const minSeasons = {
+  cl: 2000,
+  el: 2009,
+  wc: 2018,
+}
 
 interface Props {
   tournament: string,
@@ -23,7 +27,7 @@ class SelectSeason extends React.PureComponent<Props> {
       stage,
       onChange,
     } = this.props
-    onChange(tournament, stage, currentSeason)
+    onChange(tournament, stage, currentSeasonByTournament(tournament, stage as any))
   }
 
   onStageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -32,7 +36,7 @@ class SelectSeason extends React.PureComponent<Props> {
       tournament,
       onChange,
     } = this.props
-    onChange(tournament, stage, currentSeason)
+    onChange(tournament, stage, currentSeasonByTournament(tournament, stage as any))
   }
 
   onSeasonChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -52,7 +56,7 @@ class SelectSeason extends React.PureComponent<Props> {
       season,
     } = this.props
 
-    const minSeason = tournament === 'el' ? MIN_EL_SEASON : MIN_CL_SEASON
+    const minSeason = minSeasons[tournament]
 
     return (
       <div>
@@ -63,6 +67,7 @@ class SelectSeason extends React.PureComponent<Props> {
         >
           <option value="cl">Champions League</option>
           <option value="el">Europa League</option>
+          <option value="wc">World Cup</option>
         </Select>
         <Select
           label="stage"
@@ -70,15 +75,18 @@ class SelectSeason extends React.PureComponent<Props> {
           value={stage}
         >
           <option value="gs">Group Stage</option>
+          {tournament !== 'wc' &&
+            <option value="ko">Knockout Stage</option>
+          }
         </Select>
         <Select
           label="season"
           onChange={this.onSeasonChange}
           value={season}
         >
-          {range(currentSeason, minSeason - 1).map(i => (
+          {range(currentSeasonByTournament(tournament, stage as any), minSeason - 1).map(i => (
             <option value={i}>
-              {seasonAsString(i)}
+              {seasonAsString(tournament, i)}
             </option>
           ))}
         </Select>

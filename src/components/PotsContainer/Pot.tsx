@@ -1,7 +1,8 @@
 import * as React from 'react'
 import styled from 'styled-components'
 
-import { Team, GSTeam } from 'model/team'
+import Team from 'model/team'
+import GSTeam from 'model/team/GSTeam'
 import Table from 'components/table/Table'
 import Body from 'components/table/Body'
 import Header from './PotHeader'
@@ -22,7 +23,8 @@ interface Props {
   potNum: number,
   teams: Team[],
   pickedTeams: Team[],
-  selectedTeam: Team | null,
+  selectedTeams: Team[] | null,
+  depleted: boolean,
 }
 
 const Pot: React.SFC<Props> = ({
@@ -30,13 +32,14 @@ const Pot: React.SFC<Props> = ({
   potNum,
   teams,
   pickedTeams,
-  selectedTeam,
+  selectedTeams,
+  depleted,
 }) => {
   return (
     <Root highlighted={isCurrent}>
       <Header
         highlighted={isCurrent}
-        depleted={!teams || pickedTeams.length === teams.length}
+        depleted={depleted}
       >
         Pot {potNum + 1}
       </Header>
@@ -53,7 +56,7 @@ const Pot: React.SFC<Props> = ({
               key={team.id}
               data-cellId={team.id}
               title={pairing && `paired with ${pairing.name}`}
-              selected={team === selectedTeam}
+              selected={selectedTeams && selectedTeams.includes(team)}
               picked={pickedTeams.includes(team)}
               country={country}
             >

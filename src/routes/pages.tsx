@@ -1,15 +1,18 @@
 import * as React from 'react'
-import { Route, Switch } from 'react-router-dom'
+import { Route, Switch, Redirect } from 'react-router-dom'
 import Helmet from 'react-helmet'
 import delay from 'delay.js'
 import { uniqueId, memoize } from 'lodash'
 
-import currentSeason from 'model/currentSeason'
-import { fetchPots, parseGS } from 'model/fetch-parse-pots'
-import { GSTeam } from 'model/team'
+import fetchPots from 'model/fetchPotsData'
+import parseGS from 'model/parsePotsData/gs'
+import parseKo from 'model/parsePotsData/ko'
+import parseWc from 'model/parsePotsData/wc'
+import Team from 'model/team'
 
 import getCountryFlagUrl from 'utils/getCountryFlagUrl'
 import prefetchImage from 'utils/prefetchImage'
+import currentSeasonByTournament from 'utils/currentSeasonByTournament'
 
 import Popup from 'components/Popup'
 
@@ -25,7 +28,7 @@ interface Props {
 
 interface State {
   key: string,
-  pots: GSTeam[][] | null,
+  pots: Team[][] | null,
   waiting: boolean,
   error: string | null,
   // tournament: string,
@@ -34,24 +37,23 @@ interface State {
 }
 
 class Pages extends React.PureComponent<Props, State> {
-  state = {
+  state: State = {
     key: uniqueId(),
     pots: null,
     waiting: false,
     error: null,
-    season: currentSeason,
+    season: currentSeasonByTournament('uefa', 'gs'),
   }
 
   componentDidMount() {
-    const {
-      tournament,
-      stage,
-      season,
-    } = this.getMatchParams()
-    this.fetchData(tournament, stage, season ? +season : currentSeason)
+    this.update(this.props, true)
   }
 
   componentWillReceiveProps(nextProps: Props) {
+    this.update(nextProps, false)
+  }
+
+  private update(nextProps: Props, force: boolean) {
     const { props } = this
     const {
       tournament,
@@ -59,7 +61,7 @@ class Pages extends React.PureComponent<Props, State> {
       season,
       dummyKey,
     } = nextProps
-    if (props.season !== season || props.stage !== stage || props.tournament !== tournament) {
+    if (force || props.season !== season || props.stage !== stage || props.tournament !== tournament) {
       this.fetchData(tournament, stage, season)
     } else if (props.dummyKey !== dummyKey) {
       this.setState({
@@ -70,9 +72,10 @@ class Pages extends React.PureComponent<Props, State> {
 
   private getMatchParams() {
     const { params } = this.props.match
+    const season = params.season ? +params.season : currentSeasonByTournament(params.tournament, params.stage)
     return {
       ...params,
-      season: params.season ? +params.season : currentSeason,
+      season,
     }
   }
 
@@ -81,7 +84,10 @@ class Pages extends React.PureComponent<Props, State> {
       waiting: true,
     })
     try {
-      const pots = await this.getPots(tournament, stage, season)
+      const potsPromise = tournament === 'wc'
+        ? this.getWcPots(season)
+        : this.getPotsFromBert(tournament, stage, season)
+      const pots = await potsPromise
       await this.prefetchImages(pots)
       this.setState({
         pots,
@@ -106,19 +112,24 @@ class Pages extends React.PureComponent<Props, State> {
     console.error(err)
     const { tournament, stage } = this.getMatchParams()
     const { pots, season } = this.state
-    const newSeason = pots && season !== currentSeason ? season : undefined
+    const newSeason = pots && season !== currentSeasonByTournament(tournament, stage) ? season : undefined
     this.props.onSeasonChange(tournament, stage, newSeason)
     this.setState({
       error: null,
     })
   }
 
-  private getPots = memoize(async (tournament: string, stage: string, season: number) => {
+  private getWcPots = memoize(async (season: number) => {
+    const file = await import(`data/wc-${season}.json`)
+    return parseWc(file)
+  })
+
+  private getPotsFromBert = memoize(async (tournament: string, stage: string, season: number) => {
     const data = await fetchPots(tournament, season)
-    return parseGS(data)
+    return (stage === 'ko' ? parseKo : parseGS)(data)
   }, (tournament, stage, season) => `${tournament}-${stage}-${season}`)
 
-  private prefetchImages(pots: GSTeam[][]) {
+  private prefetchImages(pots: Team[][]) {
     const promises: Promise<void>[] = []
     for (const pot of pots) {
       const urls = pot.map(team => getCountryFlagUrl(team.country))
@@ -155,49 +166,84 @@ class Pages extends React.PureComponent<Props, State> {
       <div>
         {this.getPopup()}
         <Switch>
-          <Route path="/cl/gs">
+          <Route path="/cl">
             <div>
               <Helmet>
                 <title>CL draw simulator</title>
+                <link rel="icon" href="//img.uefa.com/imgml/favicon/comp/ucl.ico" type="image/x-icon" />
                 <meta name="theme-color" content="#00336a" />
                 <meta name="description" content="Champions League draw simulator" />
               </Helmet>
-              <PageLoader
-                tournament="cl"
-                stage="gs"
-                pots={pots}
-                key={key}
-              />
+              <Switch>
+                <Route path="/cl/gs">
+                  <PageLoader
+                    tournament="cl"
+                    stage="gs"
+                    pots={pots}
+                    key={key}
+                  />
+                </Route>
+                <Route path="/cl/ko">
+                  <PageLoader
+                    tournament="cl"
+                    stage="ko"
+                    pots={pots}
+                    key={key}
+                  />
+                </Route>
+              </Switch>
             </div>
           </Route>
-          <Route path="/cl/ro16">
-            <div>
-              <Helmet>
-                <title>CL draw simulator</title>
-                <meta name="theme-color" content="#00336a" />
-                <meta name="description" content="Champions League draw simulator" />
-              </Helmet>
-              <PageLoader
-                tournament="cl"
-                stage="ro16"
-                pots={pots}
-                key={key}
-              />
-            </div>
-          </Route>
-          <Route path="/el/gs">
+          <Route path="/el">
             <div>
               <Helmet>
                 <title>EL draw simulator</title>
+                <link rel="icon" href="//img.uefa.com/imgml/favicon/comp/uefacup.ico" type="image/x-icon" />
                 <meta name="theme-color" content="#f68e00" />
                 <meta name="description" content="Europa League draw simulator" />
               </Helmet>
-              <PageLoader
-                tournament="el"
-                stage="gs"
-                pots={pots}
-                key={key}
-              />
+              <Switch>
+                <Route path="/el/gs">
+                  <PageLoader
+                    tournament="el"
+                    stage="gs"
+                    pots={pots}
+                    key={key}
+                  />
+                </Route>
+                <Route path="/el/ko">
+                  <PageLoader
+                    tournament="el"
+                    stage="ko"
+                    pots={pots}
+                    key={key}
+                  />
+                </Route>
+              </Switch>
+            </div>
+          </Route>
+          <Route path="/wc">
+            <div>
+              <Helmet>
+                <title>FIFA World Cup draw simulator</title>
+                <link rel="icon" href="//www.fifa.com/imgml/favicon/favicon.ico" type="image/x-icon" />
+                <meta name="theme-color" content="#326295" />
+                <meta name="description" content="FIFA World Cup draw simulator" />
+              </Helmet>
+              <Switch>
+                <Route path="/wc/gs">
+                  <PageLoader
+                    tournament="wc"
+                    stage="gs"
+                    pots={pots}
+                    key={key}
+                  />
+                </Route>
+                <Redirect
+                  from="/wc/*"
+                  to="/wc/gs"
+                />
+              </Switch>
             </div>
           </Route>
         </Switch>

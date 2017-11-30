@@ -15,10 +15,10 @@
     "noUnusedLocals": true,
     "downlevelIteration": true,
     "lib": [
+      "es2017",
       "dom",
-      "webworker",
-      "es7",
-      "es2017"
+      "dom.iterable",
+      "webworker"
     ]
   },
   "awesomeTypescriptLoaderOptions": {

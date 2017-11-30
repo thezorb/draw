@@ -1,9 +1,14 @@
-import currentSeason from 'model/currentSeason'
+import { Location } from 'history'
 
-export default (location) => {
+import currentSeasonByTournament from './currentSeasonByTournament'
+
+const DEFAULT_TOURNAMENT = 'wc'
+const DEFAULT_STAGE = 'gs'
+
+export default (location?: Location) => {
   if (!location) {
-    return currentSeason
+    return currentSeasonByTournament(DEFAULT_TOURNAMENT, DEFAULT_STAGE)
   }
-  const seasonString = location.pathname.split('/')[3]
-  return +(seasonString || currentSeason)
+  const [, tournament, stage, seasonString] = location.pathname.split('/')
+  return +(seasonString || currentSeasonByTournament(tournament, stage as any))
 }

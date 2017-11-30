@@ -6,7 +6,7 @@ import {
   uniqueId,
 } from 'lodash'
 
-import Team from 'model/team/GSTeam'
+import Team from 'model/team/NationalTeam'
 
 import animateContentTransfer from 'utils/animateContentTransfer'
 import getGroupLetter from 'utils/getGroupLetter'
@@ -21,7 +21,7 @@ import TeamBowl from 'components/bowls/TeamBowl'
 import Announcement from 'components/Announcement'
 
 import Root from 'pages/Root'
-import * as EsWorker from './worker'
+import * as WcWorker from './worker'
 
 interface Props {
   pots: Team[][],
@@ -62,7 +62,7 @@ export default class GS extends React.PureComponent<Props, State> {
     if (this.worker) {
       this.worker.terminate()
     }
-    this.worker = new (EsWorker as any)()
+    this.worker = new (WcWorker as any)()
     this.worker.onmessage = this.workerOnMessage
     const initialPots = this.props.pots
     const currentPotNum = 0
@@ -83,7 +83,13 @@ export default class GS extends React.PureComponent<Props, State> {
       longCalculating: false,
       completed: false,
       error: null,
-    })
+    }, this.onInit)
+  }
+
+  private onInit = () => {
+    const { pots, currentPotNum } = this.state
+    const i = pots[currentPotNum].findIndex(team => team.host)
+    this.onTeamBallPick(i)
   }
 
   private onTeamBallPick = (i: number) => {
