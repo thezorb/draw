@@ -9,7 +9,7 @@ const Table = styled.div`
   min-width: 0;
 
   @media (max-width: 999px) {
-    margin: 0px 10px 20px 10px;
+    margin: 0px 3px 6px 3px;
   }
 `
 

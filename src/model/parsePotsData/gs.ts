@@ -5,7 +5,7 @@ import countryNames from 'data/country-names.json'
 import GSTeam from 'model/team/GSTeam'
 import pairUpTeams from 'model/pairUpTeams'
 
-const getClubName = mobile && import('utils/club-name')
+const getClubName = mobile && import(/* webpackChunkName: "short-names" */ 'utils/club-name')
 
 async function parseGSTeams(data: string) {
   const textRe = /Pot 1\s{5}([\s\S]+?)<\/table>/
@@ -40,7 +40,7 @@ function fillGSPots(teams: GSTeam[]): GSTeam[][] {
   return pots
 }
 
-export default (body: string) =>
-  parseGSTeams(body)
+export default (data: string) =>
+  parseGSTeams(data)
     .then(pairUpTeams)
     .then(fillGSPots)

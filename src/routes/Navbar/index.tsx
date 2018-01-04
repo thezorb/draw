@@ -24,9 +24,10 @@ const Root = styled.div`
   }
 
   @media (max-width: 999px) {
-    padding-top: 15px;
-    padding-bottom: 15px;
-    font-size: 32px;
+    justify-content: center;
+    margin-top: 5px;
+    font-family: 'Roboto Condensed', RobotoCondensed, RobotoCondensed-Regular, Roboto, sans-serif;
+    font-size: 10px;
   }
 `
 
@@ -36,8 +37,7 @@ interface Props {
   onSeasonChange: (tournament: string, stage: string, season: number) => void,
 }
 
-class TopPanel extends PureComponent<Props> {
-
+class Navbar extends PureComponent<Props> {
   render() {
     const {
       location,
@@ -59,19 +59,21 @@ class TopPanel extends PureComponent<Props> {
           season={season}
           onChange={onSeasonChange}
         />
-        <ALink
-          href="https://github.com/inker/draw/issues"
-          target="_blank"
-          rel="noopener"
-        >
-          Issues
-        </ALink>
         {!mobile &&
-          <GithubButton />
+          <>
+            <ALink
+              href="https://github.com/inker/draw/issues"
+              target="_blank"
+              rel="noopener"
+            >
+              Issues
+            </ALink>
+            <GithubButton />
+          </>
         }
       </Root>
     )
   }
 }
 
-export default TopPanel
+export default Navbar

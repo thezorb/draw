@@ -44,12 +44,12 @@ interface State {
   error: string | null,
 }
 
-export default class GS extends PureComponent<Props, State> {
-
+export default class ELGS extends PureComponent<Props, State> {
   private worker: Worker
 
-  componentDidMount() {
-    this.reset()
+  constructor(props) {
+    super(props)
+    this.reset(true)
   }
 
   componentWillUnmount() {
@@ -58,7 +58,11 @@ export default class GS extends PureComponent<Props, State> {
     }
   }
 
-  private reset = () => {
+  private onReset = () => {
+    this.reset(false)
+  }
+
+  private reset(isNew: boolean) {
     if (this.worker) {
       this.worker.terminate()
     }
@@ -68,8 +72,8 @@ export default class GS extends PureComponent<Props, State> {
     const currentPotNum = 0
     const pots = initialPots.map(pot => shuffle(pot))
     const currentPot = pots[currentPotNum]
-    this.setState({
-      drawId: `draw-${uniqueId()}`,
+    const newState = {
+      drawId: uniqueId('draw-'),
       initialPots,
       pots,
       groups: currentPot.map(team => []),
@@ -83,7 +87,12 @@ export default class GS extends PureComponent<Props, State> {
       longCalculating: false,
       completed: false,
       error: null,
-    })
+    }
+    if (isNew) {
+      this.state = newState
+    } else {
+      this.setState(newState)
+    }
   }
 
   private onTeamBallPick = (i: number) => {
@@ -177,9 +186,6 @@ export default class GS extends PureComponent<Props, State> {
   }
 
   render() {
-    if (!this.state) {
-      return null
-    }
     const {
       initialPots,
       pots,
@@ -206,7 +212,6 @@ export default class GS extends PureComponent<Props, State> {
           />
           <GroupsContainer
             maxTeams={maxTeamsInGroup}
-            selectedTeam={selectedTeam}
             currentPotNum={currentPotNum}
             groups={groups}
             possibleGroups={null}
@@ -229,7 +234,7 @@ export default class GS extends PureComponent<Props, State> {
             pickedGroup={pickedGroup}
             possibleGroups={null}
             numGroups={groups.length}
-            reset={this.reset}
+            reset={this.onReset}
           />
         </BowlsContainer>
       </Root>

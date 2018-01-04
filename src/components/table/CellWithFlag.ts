@@ -11,9 +11,9 @@ const CellWithoutFlag = styled(Cell)`
   padding-left: 22px;
 
   @media (max-width: 999px) {
-    background-position: 4px;
-    background-size: 32px;
-    padding-left: 40px;
+    background-position: 2px;
+    background-size: 12px;
+    padding-left: 16px;
   }
 `
 

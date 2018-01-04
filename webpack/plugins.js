@@ -44,30 +44,39 @@ module.exports = env => [
     'process.env': {
       NODE_ENV: JSON.stringify(env === 'dev' ? 'development' : 'production'),
     },
+    __VERSION__: JSON.stringify(new Date().toUTCString()),
   }),
 
   new NamedChunksPlugin(chunkToName),
 
   // new (env === 'dev' ? NamedModulesPlugin : HashedModuleIdsPlugin)(),
 
-  env !== 'dev' && new CommonsChunkPlugin({
+  new CommonsChunkPlugin({
     name: 'app',
     children: true,
+    deepChildren: true,
     minChunks: 2,
     async: 'commons',
   }),
 
-  env !== 'dev' && new CommonsChunkPlugin({
-    name: 'vendor',
+  new CommonsChunkPlugin({
+    name: 'vendor-static',
     // names: 'vendor',
-    // chunks: 'app',
+    // chunks: ['app'],
     minChunks: ({ context }) => context && context.includes('node_modules'),
   }),
 
-  // env !== 'dev' && new CommonsChunkPlugin({
-  //   name: 'runtime',
-  //   minChunks: Infinity,
-  // }),
+  new CommonsChunkPlugin({
+    async: 'vendor-main',
+    // names: 'vendor',
+    chunks: ['main'],
+    minChunks: ({ context }) => context && context.includes('node_modules'),
+  }),
+
+  new CommonsChunkPlugin({
+    name: 'runtime',
+    minChunks: Infinity,
+  }),
 
   new HtmlWebpackPlugin({
     filename: 'index.html',

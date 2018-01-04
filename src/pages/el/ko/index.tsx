@@ -34,19 +34,23 @@ interface State {
   error: string | null,
 }
 
-export default class RoundOf16 extends PureComponent<Props, State> {
-
-  componentDidMount() {
-    this.reset()
+export default class ELKO extends PureComponent<Props, State> {
+  constructor(props) {
+    super(props)
+    this.reset(true)
   }
 
-  private reset = () => {
+  private onReset = () => {
+    this.reset(false)
+  }
+
+  private reset(isNew: boolean) {
     const initialPots = this.props.pots
     const currentPotNum = 1
     const currentMatchupNum = 0
     const pots = initialPots.map(pot => shuffle(pot))
-    this.setState({
-      drawId: `draw-${uniqueId()}`,
+    const newState = {
+      drawId: uniqueId('draw-'),
       initialPots,
       pots,
       matchups: range(16).map(i => [] as any as [Team, Team]),
@@ -56,7 +60,12 @@ export default class RoundOf16 extends PureComponent<Props, State> {
       possiblePairings: null,
       completed: false,
       error: null,
-    })
+    }
+    if (isNew) {
+      this.state = newState
+    } else {
+      this.setState(newState)
+    }
   }
 
   private onBallPick = (i: number) => {
@@ -122,9 +131,6 @@ export default class RoundOf16 extends PureComponent<Props, State> {
   }
 
   render() {
-    if (!this.state) {
-      return null
-    }
     const {
       initialPots,
       pots,
@@ -177,7 +183,7 @@ export default class RoundOf16 extends PureComponent<Props, State> {
               pickedGroup={null}
               possibleGroups={null}
               numGroups={0}
-              reset={this.reset}
+              reset={this.onReset}
             />
           }
           {possiblePairings &&

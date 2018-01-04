@@ -40,19 +40,23 @@ interface State {
   error: string | null,
 }
 
-export default class GS extends PureComponent<Props, State> {
-
-  componentDidMount() {
-    this.reset()
+export default class CLGS extends PureComponent<Props, State> {
+  constructor(props) {
+    super(props)
+    this.reset(true)
   }
 
-  private reset = () => {
+  private onReset = () => {
+    this.reset(false)
+  }
+
+  private reset(isNew: boolean) {
     const initialPots = this.props.pots
     const currentPotNum = 0
     const pots = initialPots.map(pot => shuffle(pot))
     const currentPot = pots[currentPotNum]
-    this.setState({
-      drawId: `draw-${uniqueId()}`,
+    const newState = {
+      drawId: uniqueId('draw-'),
       initialPots,
       pots,
       groups: currentPot.map(team => []),
@@ -66,7 +70,12 @@ export default class GS extends PureComponent<Props, State> {
       possibleGroupsShuffled: null,
       completed: false,
       error: null,
-    })
+    }
+    if (isNew) {
+      this.state = newState
+    } else {
+      this.setState(newState)
+    }
   }
 
   private onTeamBallPick = (i: number) => {
@@ -144,9 +153,6 @@ export default class GS extends PureComponent<Props, State> {
   }
 
   render() {
-    if (!this.state) {
-      return null
-    }
     const {
       initialPots,
       pots,
@@ -173,7 +179,6 @@ export default class GS extends PureComponent<Props, State> {
           />
           <GroupsContainer
             maxTeams={maxTeamsInGroup}
-            selectedTeam={selectedTeam}
             currentPotNum={currentPotNum}
             groups={groups}
             possibleGroups={possibleGroups}
@@ -194,7 +199,7 @@ export default class GS extends PureComponent<Props, State> {
             pickedGroup={pickedGroup}
             possibleGroups={possibleGroups}
             numGroups={groups.length}
-            reset={this.reset}
+            reset={this.onReset}
           />
           <GroupBowl
             completed={completed}

@@ -7,13 +7,22 @@ import {
   Switch,
 } from 'react-router-dom'
 
+import config from '../config.json'
+
+import Visibility from 'components/Visibility'
+
 import getCurrentSeason from 'utils/getCurrentSeason'
 
-import TopPanel from './TopPanel'
+import Navbar from './Navbar'
 import Pages from './pages'
 import history from './history'
 
-interface Props {}
+const { defaultTournament, defaultStage } = config
+
+interface Props {
+  initial: boolean,
+  setPopup: (o: { waiting?: boolean, error?: string | null }) => void,
+}
 
 interface State {
   key: string,
@@ -80,6 +89,7 @@ class Routes extends PureComponent<Props, State> {
         tournament={tournament}
         stage={stage}
         season={season}
+        setPopup={this.props.setPopup}
         onSeasonChange={this.onSeasonChange}
       />
     ) : null
@@ -91,12 +101,14 @@ class Routes extends PureComponent<Props, State> {
     } = this.state
     return (
       <Router>
-        <div>
-          <TopPanel
-            refresh={this.refresh}
-            location={location}
-            onSeasonChange={this.onSeasonChange}
-          />
+        <>
+          <Visibility visible={!this.props.initial}>
+            <Navbar
+              refresh={this.refresh}
+              location={location}
+              onSeasonChange={this.onSeasonChange}
+            />
+          </Visibility>
           <Switch>
             <Route
               path="/:tournament/:stage/:season?"
@@ -104,22 +116,22 @@ class Routes extends PureComponent<Props, State> {
             />
             <Redirect
               from="/wc"
-              to="/wc/gs"
+              to={`/wc/${defaultStage}`}
             />
             <Redirect
               from="/el"
-              to="/el/gs"
+              to={`/el/${defaultStage}`}
             />
             <Redirect
               from="/cl"
-              to="/cl/gs"
+              to={`/cl/${defaultStage}`}
             />
             <Redirect
               from="/"
-              to="/wc"
+              to={`/${defaultTournament}`}
             />
           </Switch>
-        </div>
+        </>
       </Router>
     )
   }
