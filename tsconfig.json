@@ -23,6 +23,7 @@
   },
   "awesomeTypescriptLoaderOptions": {
     "useBabel": true,
+    "babelCore": "@babel/core",
     "useCache": true
     /* ... */
   },
