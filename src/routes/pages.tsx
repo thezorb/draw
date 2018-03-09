@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react'
 import { Route, Switch, Redirect } from 'react-router-dom'
 import Helmet from 'react-helmet'
 import delay from 'delay.js'
+import timelimit from 'timelimit'
 import { uniqueId, memoize } from 'lodash'
 
 import fetchPots from 'model/fetchPotsData'
@@ -42,6 +43,7 @@ interface Props {
   season: number,
   dummyKey: string,
   setPopup: (o: { waiting?: boolean, error?: string | null }) => void,
+  onLoadError: (err: Error) => void,
   onSeasonChange: (tournament: string, stage: string, season?: number) => void,
 }
 
@@ -103,7 +105,9 @@ class Pages extends PureComponent<Props, State> {
         ? getWcPots(season)
         : getPotsFromBert(tournament, stage, season)
       const pots = await potsPromise
-      await prefetchImages(pots)
+      await timelimit(prefetchImages(pots), 5000, {
+        rejectOnTimeout: false,
+      })
       await delay(0)
       this.setState({
         pots,
@@ -138,6 +142,7 @@ class Pages extends PureComponent<Props, State> {
   }
 
   render() {
+    const { props } = this
     const { pots, key } = this.state
     return (
       <Switch>
@@ -156,6 +161,7 @@ class Pages extends PureComponent<Props, State> {
                   stage="gs"
                   pots={pots}
                   key={key}
+                  onLoadError={props.onLoadError}
                 />
               </Route>
               <Route path="/cl/ko">
@@ -164,6 +170,7 @@ class Pages extends PureComponent<Props, State> {
                   stage="ko"
                   pots={pots}
                   key={key}
+                  onLoadError={props.onLoadError}
                 />
               </Route>
             </Switch>
@@ -184,6 +191,7 @@ class Pages extends PureComponent<Props, State> {
                   stage="gs"
                   pots={pots}
                   key={key}
+                  onLoadError={props.onLoadError}
                 />
               </Route>
               <Route path="/el/ko">
@@ -192,6 +200,7 @@ class Pages extends PureComponent<Props, State> {
                   stage="ko"
                   pots={pots}
                   key={key}
+                  onLoadError={props.onLoadError}
                 />
               </Route>
             </Switch>
@@ -212,6 +221,7 @@ class Pages extends PureComponent<Props, State> {
                   stage="gs"
                   pots={pots}
                   key={key}
+                  onLoadError={props.onLoadError}
                 />
               </Route>
               <Redirect

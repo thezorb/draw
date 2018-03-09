@@ -8,7 +8,7 @@ const tsOptions = env => env === 'dev' ? {
   // getCustomTransformers: () => ({ before: [styledComponentsTransformer] }),
 } : {
   getCustomTransformers: () => ({ before: [createLodashTransformer()] }),
-  ignoreDiagnostics: [2339, 2345, 2459],
+  ignoreDiagnostics: [2320, 2339, 2345, 2459, 2717],
 }
 
 module.exports = env => [
@@ -37,9 +37,10 @@ module.exports = env => [
   {
     test: /\.(png|jpg|jpeg|gif|svg)$/,
     use: {
-      loader: 'url-loader',
+      loader: 'file-loader',
       options: {
-        limit: 1,
+        name: '[name].[hash].[ext]',
+        outputPath: 'images',
       },
     },
   },

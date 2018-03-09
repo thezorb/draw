@@ -2,6 +2,7 @@ const path = require('path')
 
 const {
   DefinePlugin,
+  HotModuleReplacementPlugin,
   optimize: {
     CommonsChunkPlugin,
     OccurrenceOrderPlugin,
@@ -33,7 +34,7 @@ const moduleToFileNames = (module) => {
 
 const chunkToName = (chunk) =>
   chunk.name
-  || chunk.modules.map(moduleToFileNames).find((name) => name)
+  || Array.from(chunk.modulesIterable, moduleToFileNames).find((name) => name)
   || null
 
 module.exports = env => [
@@ -46,6 +47,8 @@ module.exports = env => [
     },
     __VERSION__: JSON.stringify(new Date().toUTCString()),
   }),
+
+  env === 'dev' && new HotModuleReplacementPlugin(),
 
   new NamedChunksPlugin(chunkToName),
 

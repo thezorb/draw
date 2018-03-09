@@ -45,7 +45,7 @@ function groupIsPossible(
     return true
   }
   const currentPot = pots[currentPotIndex]
-  const team = currentPot.pop() as Team
+  const team = currentPot.pop()!
   let possible = false
   for (const groupNum of filterGroupsBasic(groups, team, currentPotIndex)) {
     const group = groups[groupNum]
@@ -87,7 +87,9 @@ function filterSomeGroups(
     for (const team of group) {
       if (team.country === teamPicked.country || extraCondition(team)) {
         canDraw = false
-        if (team.pairing === teamPicked) {
+        // WTF BUG (WebWorker?)
+        // if (team.pairing === teamPicked) {
+        if (team && team.pairing && team.pairing.id === teamPicked.id) {
           return []
         }
         break
